@@ -1,0 +1,4 @@
+Gemfile.lock
+.idea/
+target/
+/talk-bce.iml
