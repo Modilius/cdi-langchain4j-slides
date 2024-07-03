@@ -1,0 +1,129 @@
+
+== Meet CDI
+
+Contexts and Dependency Injection
+
+
+== What is CDI?
+image::cdi_icon.png[role="pull-right", width="300"]
+
+* icon:file-text[] A Jakarta EE spec
+* icon:history[] 3.0 is last (Jakarta EE 9)
+* icon:road[] 4.0 on its way
+* icon:code-fork[] Programming model of:
+** icon:check[] MicroProfile
+** icon:check[] Quarkus
+* icon:wrench[] 2 major impl.
+** icon:check[] JBoss Weld (RI)
+** icon:check[] Apache OpenWebBeans
+
+
+[NOTE.speaker]
+--
+Java SE is supported by impls and will be at spec level in 2.0
+--
+
+
+== What's included?
+
+
+
+CDI Provides:
+
+image::cdi_logo.png[role="pull-right", width="280"]
+
+====
+. A powerful *programming model*
+. Different *Lifecycles* for stateful objects
+. A *Typesafe* DI mechanism
+. The ability to *decorate* injected objects
+. The ability to *intercept* methods
+. An *event* notification model
+. A *SPI* allowing *portable extensions* to integrate 3rd party tech
+====
+
+
+== CDI explained to your boss
+
+[quote,role="smallest"]
+____
+*CDI* brings a _powerful_ and _modern_ programming _model_ that standardizes _good practices_.
+
+*CDI* provides a _consistent_ and _seamless_ way to _integrate_ 3rd party frameworks to this _model_.
+
+Once adopted, *CDI* will become the _invisible backbone_ of our projects.
+____
+
+
+== One container to rule them all
+
+CAUTION: The container is the heart of CDI
+
+CAUTION: The container checks all possible CDI code at boot time
+
+CAUTION: The container manages your components lifecycle and services
+
+CAUTION: Yet, you'll never see it (except in advanced development)
+
+
+[quote,role="smallest"]
+____
+Container is your application's invisible conductor
+____
+
+
+== DI explained to your granny 1/3
+
+
+TIP: Dependency Injection delegates to a *container*/*injector*/*manager*...
+
+TIP: ...the *creation* (and *disposal*) of classes' instances...
+
+TIP: ...and the *assignment* of these instances to *fields* or *parameters*...
+
+TIP: ...in consuming code.
+
+[quote,role="smallest"]
+____
+DI is a *design pattern*
+____
+
+
+== DI explained to your granny 2/3
+
+TIP: Without DI
+
+[source, subs="verbatim,quotes"]
+----
+public class EnglishHelloService implements HelloService {
+    public String hello() {
+        return "Hello World!";
+    }
+}
+
+public class MyBean {
+    private HelloService service = *new EnglishHelloService()*; //<1>
+}
+----
+<1> instantiation and assignment is done in code
+
+
+== DI explained to your granny 3/3
+
+TIP: With DI
+
+[source, subs="verbatim,quotes"]
+----
+public class EnglishHelloService implements HelloService {
+    public String hello() {
+        return "Hello World!";
+    }
+}
+
+public class MyBean {
+
+    [highlight]#@Inject# //<1>
+    private HelloService service;
+}
+----
+<1> instantiation and assignment is done by the container

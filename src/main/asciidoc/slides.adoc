@@ -1,0 +1,104 @@
+= Introduction to CDI and its extensions
+Antoine Sabot-Durand; Yann Blazart; Pierre Cesmat
+:description: Going farther with CDI
+:copyright: CC BY-SA 4.0
+:data-uri:
+:sectids!:
+:includegifs:
+:toc2:
+:sectanchors:
+:idprefix:
+:idseparator: -
+:icons: font
+:source-highlighter: highlight.js
+:source-language: java
+:macros-on: subs="macros"
+:imagesdir: ../resources/images
+:hide-uri-scheme:
+:revealjs_theme: beige
+:revealjsdir: https://cdn.jsdelivr.net/npm/reveal.js@5.1.0
+:revealjs_hash: true
+:revealjs_height: 1000
+:revealjs_center: true
+
+
+
+
+== Antoine Sabot-Durand
+//TODO: add a picture
+
+* icon:coffee[] Antoine Sabot-Durand
+
+== Agenda
+
+TIP: _Slides_ here {slides-url}
+
+
+* icon:clock-o[] Meet CDI
+* icon:clock-o[] Basic DI
+* icon:clock-o[] Qualifiers
+* icon:clock-o[] Producers
+//* icon:clock-o[] Bean resolution
+//* icon:clock-o[] Programmatic Lookup
+//* icon:clock-o[] Contexts
+* icon:clock-o[] SPI
+* icon:clock-o[] Portable Extensions
+* icon:clock-o[] Events
+* icon:clock-o[] Interceptors and Decorators
+//* icon:clock-o[] Conclusion
+
+
+
+include::parts/intro.adoc[]
+
+include::parts/inject.adoc[]
+
+include::parts/qualifiers.adoc[]
+
+include::parts/producers.adoc[]
+
+include::parts/events.adoc[]
+
+include::parts/spi.adoc[]
+
+include::parts/portable-extensions.adoc[]
+
+//include::parts/resolution.adoc[]
+
+//include::parts/programmatic-lookup.adoc[]
+
+//include::parts/contexts.adoc[]
+
+//include::parts/aop.adoc[]
+
+
+
+
+== Conclusion
+
+
+
+== Features not covered in this talk
+
+CAUTION: *Stereotypes* creating annotation gathering multiple annotations
+
+CAUTION: *Alternatives* replace a bean for tests or specific environments
+
+CAUTION: *Specialization* bean overriding
+
+CAUTION: *Transactional events* binding events to specific transaction phase
+
+CAUTION: Check the spec on {spec-url}
+
+
+== References
+
+NOTE: _Slides_ are accessible here {slides-url}
+
+NOTE: _Slides source_ {slides-src}
+
+NOTE: Slides generated with _Asciidoctor_ and _Reveal.js_
+
+NOTE: License of this doc: {license-url}[{license}]
+
+

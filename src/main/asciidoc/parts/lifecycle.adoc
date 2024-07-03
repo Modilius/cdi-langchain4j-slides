@@ -1,0 +1,73 @@
+[.topic.intro]
+== Annexes
+
+
+[.topic.source]
+== Complete lifecycle events
+
+[plantuml, "lifecycle-complete", "svg", height="95%"]
+----
+@startuml
+
+skinparam shadowing false
+skinparam backgroundColor transparent
+skinparam defaultFontName Consolas
+skinparam titleFontSize 30
+
+skinparam activity {
+  BackgroundColor #337788
+  ArrowColor #888888
+  BarColor #888888
+  BorderColor White
+  FontName Consolas
+  FontColor White
+  FontSize 20
+  DiamondFontSize 14
+}
+
+|**Application Lifecycle**|
+start
+#BB3322:BeforeBeanDiscovery>
+
+|**Type Discovery**|
+
+while (<color:#FFFFFF>while types in</color>\n<color:#FFFFFF>deployment archive?</color>) is (yes)
+fork
+    :ProcessAnnotatedType<X> >
+/' fork again
+    :ProcessSyntheticAnnotatedType<X> > '/
+end fork
+endwhile (no)
+
+|**Application Lifecycle**|
+#BB3322:AfterTypeDiscovery>
+
+|**Bean Discovery**|
+fork
+partition "**For each discovered types during type discovery**" {
+    :ProcessInjectionPoint<T, X> >
+    :ProcessInjectionTarget<X> >
+    :ProcessBeanAttributes<T> >
+    :ProcessManagedBean<X> >
+}
+fork again
+partition "**For each producer methods / fields of enabled beans**" {
+    :ProcessInjectionPoint<T, X> >
+    :ProcessProducer<T, X> >
+    :ProcessBeanAttributes<T> >
+    :ProcessProducerMethod<T, X>\nProcessProducerField<T, X> >
+}
+fork again
+partition "**For each observer methods of enabled beans**" {
+    :ProcessInjectionPoint<T, X> >
+    :ProcessObserverMethod<T, X> >
+}
+end fork
+
+|**Application Lifecycle**|
+#BB3322:AfterBeanDiscovery>
+#BB3322:AfterDeploymentValidation>
+stop
+
+@enduml
+----
