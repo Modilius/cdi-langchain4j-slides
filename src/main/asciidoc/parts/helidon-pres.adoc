@@ -3,8 +3,7 @@
 
 == Presentation
 
-Il s'agit d'une application de réservation de voitures simplifiée, inspirée de la conférence "Java meets AI" de Lize Raes à Devoxx Belgique 2023.
-La société de location de voitures s'appelle "Miles of Smiles" et l'application propose deux services d'IA :
+Proposer deux services d'IA pour une société de location de voiture :
 
 * Un service de chat pour discuter librement avec le service client
 * Un service de détection de fraude pour déterminer si un client est un fraudeur.
@@ -25,3 +24,82 @@ Pour des raisons de simplicité, il n'y a pas d'interaction avec une base de don
 * Quarkus propose une extension langchain4j
 * Helidon non
 * Découvrir l'utilisation de langchain4j avec CDI
+
+== Large Language Models
+
+pres LLM ?
+
+== Ai Model
+
+Provide to langchain the AiModel we want to use for instance:
+
+[source,subs="verbatim,quotes"]
+----
+@ApplicationScoped
+public class ModelFactory {
+    @Produces
+    private AzureOpenAiChatModel model;
+    @PostConstruct
+    private void initModel() {
+        model = AzureOpenAiChatModel.builder()
+                .apiKey(AZURE_OPENAI_KEY)
+                .endpoint(AZURE_OPENAI_ENDPOINT)
+                .serviceVersion(AZURE_OPENAI_SERVICE_VERSION)
+                .deploymentName(AZURE_OPENAI_DEPLOYMENT_NAME)
+                .temperature(AZURE_OPENAI_TEMPERATURE)
+                .topP(AZURE_OPENAI_TOP_P)
+                .timeout(Duration.ofSeconds(AZURE_OPENAI_TIMEOUT_SECONDS))
+                .maxRetries(AZURE_OPENAI_MAX_RETRIES)
+                .logRequestsAndResponses(AZURE_OPENAI_LOG_REQUESTS_AND_RESPONSES)
+                .build();
+    }
+}
+----
+
+== Ai Service Interface
+
+In order to be able to interact with the LLM, we need to define an AiService
+
+[source,subs="verbatim,quotes"]
+----
+public interface ChatAiService {
+    @SystemMessage("""
+        You are a customer support agent of a car rental company named 'Miles of Smiles'.
+        Before providing information about booking or canceling a booking, you MUST always check:
+        booking number, customer name and surname.
+        You should not answer to any request not related to car booking or Miles of Smiles company general information.
+        When a customer wants to cancel a booking, you must check his name and the Miles of Smiles cancellation policy first.
+        Any cancelation request must comply with cancellation policy both for the delay and the duration.
+        Today is {{current_date}}.
+        """)
+    String chat(String question);
+}
+----
+
+== Ai Service Factory
+
+We need to create a factory with a producer to allow CDI to inject our instance of ChatAiService
+
+[source,subs="verbatim,quotes"]
+----
+@ApplicationScoped
+public class ChatAiFactory {
+    @Inject
+    private AzureOpenAiChatModel model;
+
+    @Inject
+    @ConfigProperty(name = "chat.memory.max.messages", defaultValue = "10")
+    private Integer memoryMaxMessages;
+
+    @Produces
+    public ChatAiService getChatAiService() {
+        return AiServices.builder(ChatAiService.class)
+                .chatLanguageModel(model)
+                .tools(bookingService)
+                .chatMemory(MessageWindowChatMemory.withMaxMessages(memoryMaxMessages))
+                .contentRetriever(retriever)
+                .build();
+    }
+}
+----
+
