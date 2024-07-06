@@ -1,0 +1,27 @@
+
+== Helidon car booking
+
+== Presentation
+
+Il s'agit d'une application de réservation de voitures simplifiée, inspirée de la conférence "Java meets AI" de Lize Raes à Devoxx Belgique 2023.
+La société de location de voitures s'appelle "Miles of Smiles" et l'application propose deux services d'IA :
+
+* Un service de chat pour discuter librement avec le service client
+* Un service de détection de fraude pour déterminer si un client est un fraudeur.
+
+Pour des raisons de simplicité, il n'y a pas d'interaction avec une base de données, l'application est autonome et peut être utilisée "telle quelle".
+
+== Stack
+
+* Java 22 (Temurin OpenJDK distro)
+* Helidon 4.0.7
+* Helidon CLI 3.0.4
+* Maven 3.9.5
+* LangChain4j 0.30.0
+* LLM provider (Azure for now)
+
+== Pourquoi cette application
+
+* Quarkus propose une extension langchain4j
+* Helidon non
+* Découvrir l'utilisation de langchain4j avec CDI

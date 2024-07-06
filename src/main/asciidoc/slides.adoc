@@ -69,7 +69,7 @@ include::parts/portable-extensions.adoc[]
 
 //include::parts/contexts.adoc[]
 
-//include::parts/aop.adoc[]
+include::parts/helidon-pres.adoc[]
 
 
 
