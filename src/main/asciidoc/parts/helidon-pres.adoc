@@ -230,7 +230,7 @@ public class ChatAiFactory {
 ----
 <1> we add the content retriever to the builder of the ChatAiService
 
-== LLM Context optimization
+== SystemMessage enhancement
 
 We will enhance the SystemMessage to give more context and/or instructions to our LLM.
 
@@ -251,3 +251,140 @@ public interface ChatAiService {
 ----
 <1> In those 2 sentences we specify to the LLM to check cancellation policies (who are stored into the term-of-use.txt file)
 <2> This order also is made to make sure the LLM will verify user name and surname before giving any information for a given booking
+
+== LLM access to our data
+
+As seen just before, we want to offer to the LLM the possibility to access our database to give to the user information regarding their bookings and also a possibility to cancel them
+
+This is our next focus, *Function calling* also known as *Tools*
+
+It enables the LLM to utilize, when needed, one or more available tools/functions you will provide to him.
+
+== BookingService 1/5
+
+First, we need to create a Booking model
+
+[source,subs="verbatim,quotes"]
+----
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class Booking {
+    private String bookingNumber;
+    private LocalDate start;
+    private LocalDate end;
+    private Customer customer;
+    private boolean canceled = false;
+    private String carModel;
+}
+----
+
+== BookingService 2/5
+
+Then a BookingService to simulate db interactions using a memory HashMap of bookings populated at startup
+
+[source,subs="verbatim,quotes"]
+----
+@ApplicationScoped
+public class BookingService {
+
+    // Pseudo database
+    private static final Map<String, Booking> BOOKINGS = new HashMap<>();
+    static {
+        BOOKINGS.put("123-456", new Booking("123-456", LocalDate.now().plusDays(1), LocalDate.now().plusDays(7),
+                new Customer("James", "Bond"), false, "Aston Martin"));
+        BOOKINGS.put("234-567", new Booking("234-567", LocalDate.now().plusDays(10), LocalDate.now().plusDays(12),
+                new Customer("James", "Bond"), false, "Renault"));
+    }
+}
+----
+
+== BookingService 3/5
+
+Create a function to retrieve all the bookings for a dedicated customer
+
+[source,subs="verbatim,quotes"]
+----
+@ApplicationScoped
+public class BookingService {
+
+    @Tool("Get all booking ids for a customer given his name and surname")
+    public List<String> getBookingsForCustomer(String name, String surname) {
+        log.info("DEMO: Calling Tool-getBookingsForCustomer: " + name + " " + surname);
+        Customer customer = new Customer(name, surname);
+        return BOOKINGS.values()
+                .stream()
+                .filter(booking -> booking.getCustomer().equals(customer))
+                .map(Booking::getBookingNumber)
+                .collect(Collectors.toList());
+    }
+}
+----
+
+== BookingService 4/5
+
+TODO
+
+[source,subs="verbatim,quotes"]
+----
+@ApplicationScoped
+public class BookingService {
+
+    @Tool("Get booking details given a booking number and customer name and surname")
+    public Booking getBookingDetails(String bookingNumber, String name, String surname) {
+        log.info("DEMO: Calling Tool-getBookingDetails: " + bookingNumber + " and customer: "
+                + name + " " + surname);
+        return checkBookingExists(bookingNumber, name, surname);
+    }
+}
+----
+
+== BookingService 5/5
+
+TODO
+
+[source,subs="verbatim,quotes"]
+----
+@ApplicationScoped
+public class BookingService {
+
+    @Tool("Cancel a booking given its booking number and customer name and surname")
+    public Booking cancelBooking(String bookingNumber, String name, String surname) {
+        log.info("DEMO: Calling Tool-cancelBooking " + bookingNumber + " for customer: " + name
+                + " " + surname);
+        Booking booking = checkBookingExists(bookingNumber, name, surname);
+
+        if (booking.isCanceled())
+            throw new BookingCannotBeCanceledException(bookingNumber);
+        checkCancelPolicy(booking);
+        booking.setCanceled(true);
+        return booking;
+    }
+}
+----
+
+== Add our Tool to ChatAiService
+
+TODO
+
+[source,subs="verbatim,quotes"]
+----
+@ApplicationScoped
+public class ChatAiFactory {
+    ...
+
+    @Inject
+    private BookingService bookingService;
+
+    @Produces
+    public ChatAiService getChatAiService() {
+        return AiServices.builder(ChatAiService.class)
+                .chatLanguageModel(model)
+                .chatMemory(MessageWindowChatMemory.withMaxMessages(memoryMaxMessages))
+                .contentRetriever(retriever)
+                .tools(bookingService)//<1>
+                .build();
+    }
+}
+----
+<1> we add the content retriever to the builder of the ChatAiService
