@@ -1,11 +1,9 @@
 
 == Helidon car booking
 
-== Presentation
-
 Proposer deux services d'IA pour une société de location de voiture :
 
-* Un service de chat pour discuter librement avec le service client
+* Un service de chat pour discuter librement avec le service client.
 * Un service de détection de fraude pour déterminer si un client est un fraudeur.
 
 Pour des raisons de simplicité, il n'y a pas d'interaction avec une base de données, l'application est autonome et peut être utilisée "telle quelle".
@@ -19,7 +17,7 @@ Pour des raisons de simplicité, il n'y a pas d'interaction avec une base de don
 * LangChain4j 0.30.0
 * LLM provider (Azure for now)
 
-== Pourquoi cette application
+== Pourquoi cette application ?
 
 * Quarkus propose une extension langchain4j
 * Helidon non
@@ -65,11 +63,7 @@ In order to be able to interact with the LLM, we need to define an AiService
 public interface ChatAiService {
     @SystemMessage("""
         You are a customer support agent of a car rental company named 'Miles of Smiles'.
-        Before providing information about booking or canceling a booking, you MUST always check:
-        booking number, customer name and surname.
         You should not answer to any request not related to car booking or Miles of Smiles company general information.
-        When a customer wants to cancel a booking, you must check his name and the Miles of Smiles cancellation policy first.
-        Any cancelation request must comply with cancellation policy both for the delay and the duration.
         Today is {{current_date}}.
         """)
     String chat(String question);
@@ -95,11 +89,165 @@ public class ChatAiFactory {
     public ChatAiService getChatAiService() {
         return AiServices.builder(ChatAiService.class)
                 .chatLanguageModel(model)
-                .tools(bookingService)
                 .chatMemory(MessageWindowChatMemory.withMaxMessages(memoryMaxMessages))
-                .contentRetriever(retriever)
                 .build();
     }
 }
 ----
 
+== API to interact with our LLM
+
+In order to interact with our LLM we will create
+
+[source,subs="verbatim,quotes"]
+----
+@ApplicationScoped
+@Path("/car-booking")
+public class CarBookingResource {
+
+    @Inject
+    private ChatAiService aiService;
+
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    @Path("/chat")
+    @Operation(summary = "Chat with an asssitant.", description = "Ask any car booking related question.", operationId = "chatWithAssistant")
+    @APIResponse(responseCode = "200", description = "Anwser provided by assistant", content = @Content(mediaType = "text/plain"))
+    public String chatWithAssistant(@QueryParam("question") String question) {
+        String answer;
+        try {
+            answer = aiService.chat(question);
+        } catch (Exception e) {
+            answer = "My failure reason is:\n\n" + e.getMessage();
+        }
+        return answer;
+    }
+}
+----
+
+== LLM Context optimization
+
+Now that we have functional interaction with the LLM, we will seek to optimize its responses.
+
+We will dig into the RAG (Retrieval-Augmented Generation) functionality.
+
+It allow us to inject information into the LLM from files so that it can find relevant information and respond using that information, which should reduce the likelihood of hallucinations.
+
+* helidon-car-booking
+** docs-for-rag
+*** general-information.txt
+*** list-of-cars.txt
+*** terms-of-use.txt
+
+== RAG Ingestor
+
+We need to create an Ingestor class who will load our documents at application startup
+
+[source,subs="verbatim,quotes"]
+----
+@ApplicationScoped
+public class DocRagIngestor {
+
+    @Produces
+    private EmbeddingModel embeddingModel = new AllMiniLmL6V2EmbeddingModel();
+
+    @Produces
+    private EmbeddingStore<TextSegment> embeddingStore = new InMemoryEmbeddingStore<>();
+
+    @Inject
+    @ConfigProperty(name = "app.docs-for-rag.dir")
+    private File docs;
+
+    private List<Document> loadDocs() {
+        return loadDocuments(docs.getPath(), new TextDocumentParser());
+    }
+
+    public void ingest(@Observes @Initialized(ApplicationScoped.class) Object pointless) {
+        EmbeddingStoreIngestor ingestor = EmbeddingStoreIngestor.builder()
+                .documentSplitter(DocumentSplitters.recursive(300, 30))
+                .embeddingModel(embeddingModel)
+                .embeddingStore(embeddingStore)
+                .build();
+        List<Document> docs = loadDocs();
+        ingestor.ingest(docs);
+    }
+
+}
+----
+
+== RAG Factory
+
+Once documents are loaded, we need to create a ContentRetriever to allow the LLM to retrieve relevant content from the EmbeddingStore.
+
+[source,subs="verbatim,quotes"]
+----
+@ApplicationScoped
+public class DocRagRetriever {
+
+    @Inject
+    EmbeddingModel embeddingModel;
+
+    @Inject
+    EmbeddingStore<TextSegment> embeddingStore;
+
+    @Produces
+    ContentRetriever contentRetriever;
+
+    @PostConstruct
+    void init() {
+        contentRetriever = EmbeddingStoreContentRetriever.builder()
+                .embeddingStore(embeddingStore)
+                .embeddingModel(embeddingModel)
+                .maxResults(3)
+                .minScore(0.6)
+                .build();
+    }
+}
+----
+
+== Add RAG to ChatAiService
+
+Once documents are loaded, we need to create a ContentRetriever to allow the LLM to retrieve relevant content from the EmbeddingStore.
+
+[source,subs="verbatim,quotes"]
+----
+@ApplicationScoped
+public class ChatAiFactory {
+    ...
+
+    @Inject
+    private ContentRetriever retriever;
+
+    @Produces
+    public ChatAiService getChatAiService() {
+        return AiServices.builder(ChatAiService.class)
+                .chatLanguageModel(model)
+                .chatMemory(MessageWindowChatMemory.withMaxMessages(memoryMaxMessages))
+                .contentRetriever(retriever)//<1>
+                .build();
+    }
+}
+----
+<1> we add the content retriever to the builder of the ChatAiService
+
+== LLM Context optimization
+
+We will enhance the SystemMessage to give more context and/or instructions to our LLM.
+
+[source,subs="verbatim,quotes"]
+----
+public interface ChatAiService {
+    @SystemMessage("""
+        You are a customer support agent of a car rental company named 'Miles of Smiles'.
+        You should not answer to any request not related to car booking or Miles of Smiles company general information.
+        When a customer wants to cancel a booking, you must check his name and the Miles of Smiles cancellation policy first.//<1>
+        Any cancelation request must comply with cancellation policy both for the delay and the duration.//<1>
+        Before providing information about booking or canceling a booking, you MUST always check://<2>
+        booking number, customer name and surname.
+        Today is {{current_date}}.
+        """)
+    String chat(String question);
+}
+----
+<1> In those 2 sentences we specify to the LLM to check cancellation policies (who are stored into the term-of-use.txt file)
+<2> This order also is made to make sure the LLM will verify user name and surname before giving any information for a given booking
