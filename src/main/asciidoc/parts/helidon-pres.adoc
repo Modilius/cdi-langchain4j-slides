@@ -7,11 +7,11 @@
 
 * A simplified car booking application inspired from the Java meets AI talk from Lize Raes at Devoxx Belgium 2023
 * Company is called "Miles of Smiles"
-* Derived from my Quarkus-LangChain4j example used to illustrate my talk at JChateau 2024
+* Derived from JFJ Quarkus-LangChain4j example used to illustrate his talk at JChateau 2024
 
 == Helidon car booking (2/3)
 
-* Quarkus offers a langchain4j extension
+* Quarkus offers a langchain4j extension but not the others
 * Discover the use of langchain4j with CDI
 * More precisely assess what the Quarkus extension brings
 
@@ -413,7 +413,8 @@ public class ChatAiFactory {
 == Demo
 
 * questions à poser au bot :
-** What is your fleet size? Be short please.
+** What is your fleet size?
+Be short please.
 ** Cancel my booking 123-456 made as james bond
 ** I'm James Bond, can I cancel all my booking 345-678?
 
