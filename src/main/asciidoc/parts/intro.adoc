@@ -3,13 +3,13 @@
 
 Contexts and Dependency Injection
 
-
+[.columns]
 == What is CDI?
-image::cdi_icon.png[role="pull-right", width="300"]
 
+[.column]
 * icon:file-text[] A Jakarta EE spec
-* icon:history[] 3.0 is last (Jakarta EE 9)
-* icon:road[] 4.0 on its way
+* icon:history[] 4.0 is last (Jakarta EE 10)
+//* icon:road[] 4.0 on its way
 * icon:code-fork[] Programming model of:
 ** icon:check[] MicroProfile
 ** icon:check[] Quarkus
@@ -17,6 +17,8 @@ image::cdi_icon.png[role="pull-right", width="300"]
 ** icon:check[] JBoss Weld (RI)
 ** icon:check[] Apache OpenWebBeans
 
+[.column]
+image::cdi_icon.png[role="pull-right", width="300"]
 
 [NOTE.speaker]
 --
@@ -25,12 +27,6 @@ Java SE is supported by impls and will be at spec level in 2.0
 
 
 == What's included?
-
-
-
-CDI Provides:
-
-image::cdi_logo.png[role="pull-right", width="280"]
 
 ====
 . A powerful *programming model*
@@ -43,9 +39,10 @@ image::cdi_logo.png[role="pull-right", width="280"]
 ====
 
 
+
 == CDI explained to your boss
 
-[quote,role="smallest"]
+[quote]
 ____
 *CDI* brings a _powerful_ and _modern_ programming _model_ that standardizes _good practices_.
 
@@ -57,6 +54,7 @@ ____
 
 == One container to rule them all
 
+====
 CAUTION: The container is the heart of CDI
 
 CAUTION: The container checks all possible CDI code at boot time
@@ -64,12 +62,16 @@ CAUTION: The container checks all possible CDI code at boot time
 CAUTION: The container manages your components lifecycle and services
 
 CAUTION: Yet, you'll never see it (except in advanced development)
+====
 
 
-[quote,role="smallest"]
+////
+[quote]
 ____
 Container is your application's invisible conductor
 ____
+////
+
 
 
 == DI explained to your granny (1/3)

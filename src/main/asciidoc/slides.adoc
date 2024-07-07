@@ -20,6 +20,7 @@ Antoine Sabot-Durand; Yann Blazart; Pierre Cesmat
 :revealjs_hash: true
 :revealjs_height: 1000
 :revealjs_center: true
+:customcss: ../resources/css/custom.css
 
 
 
@@ -55,12 +56,14 @@ TIP: _Slides_ here {slides-url}
 
 * icon:clock-o[] Meet CDI
 * icon:clock-o[] Basic DI
+* icon:clock-o[] Meet our Helidon's LangChain4J App
 * icon:clock-o[] Qualifiers
 * icon:clock-o[] Producers
+* icon:clock-o[] Extensions
 //* icon:clock-o[] Bean resolution
 //* icon:clock-o[] Programmatic Lookup
 //* icon:clock-o[] Contexts
-* icon:clock-o[] SPI
+//* icon:clock-o[] SPI
 * icon:clock-o[] Portable Extensions
 * icon:clock-o[] Events
 * icon:clock-o[] Interceptors and Decorators

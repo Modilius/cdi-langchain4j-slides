@@ -39,6 +39,7 @@ For simplicity, there is no interaction with a database; the application is stan
 Provide to langchain the AiModel we want to use for instance:
 
 [source,subs="verbatim,quotes"]
+[.stretch]
 ----
 @ApplicationScoped
 public class ModelFactory {

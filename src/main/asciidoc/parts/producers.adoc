@@ -5,22 +5,10 @@ When you don't own your bean's class, use
 
 == What is a producer?
 
-[.smaller]
-====
 * icon:cogs[] A way to *declare a bean*...
-====
-[.smaller]
-====
 * icon:cogs[] ...from a *field* or a *method*...
-====
-[.smaller]
-====
 * icon:cogs[] ...for a class you *don't own*...
-====
-[.smaller]
-====
 * icon:cogs[] ...or a *non CDI* class.
-====
 
 [.source]
 == Declaring a Producer

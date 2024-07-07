@@ -1,8 +1,17 @@
 [.intro]
 == CDI Extensions
 
+
+== Two extension flavor
+
+Since CDI 4.0 you can choose between 2 kind of extensions
+
+* The original *Portable Extensions*
+* The *Build Time Compatible Extension* : introduced to support GraalVM and Quarkus
+
+
 [.topic.source]
-== Portable extensions
+==  Extensions's power
 
 [.statement]
 ====
@@ -37,9 +46,10 @@ TIP: Thanks to them, Java EE can evolve between major releases
 
 ====
 
+== Focus on Portable extensions
 
 [.topic.source]
-== Extensions, how?
+=== How Portable extensions work?
 
 [.statement]
 ====
@@ -58,7 +68,7 @@ TIP: Modifying these meta-data or creating new ones
 
 
 [.topic.source]
-== More concretely
+=== More concretely
 
 NOTE: Service provider of the service `javax.enterprise.inject.spi.Extension` declared in `META-INF/services`
 
@@ -81,7 +91,7 @@ public class CdiExtension [highlight]#implements Extension# {
 
 
 [.topic.source]
-== Bean manager lifecycle
+=== Bean manager lifecycle
 
 [plantuml, "lifecycle-simple", "svg", height="85%", width="95%"]
 ----
@@ -125,7 +135,7 @@ include::legend.adoc[]
 
 
 [.topic.source]
-== Example: Ignoring JPA entities
+=== Example: Ignoring JPA entities
 
 TIP: The following extension prevents CDI to manage entities
 
@@ -153,3 +163,9 @@ icon:warning[] Once the application is bootstrapped, +
 
 icon:warning[] You only have to `@Observes` _built-in CDI events_ to create your extensions
 ////
+
+== Focus on Build Time Compatible Extension
+
+=== Why a new type of extension
+
+=== bli
