@@ -151,7 +151,7 @@ Now that we have functional interaction with the LLM, we will seek to optimize i
 
 We will dig into the RAG (Retrieval-Augmented Generation) functionality.
 
-It allow us to inject information into the LLM from files so that it can find relevant information and respond using that information, which should reduce the likelihood of hallucinations.
+It allow us to inject information into the LLM from files so that it can find relevant information and respond using that information, which should reduce hallucinations.
 
 * general-information.txt
 * list-of-cars.txt
