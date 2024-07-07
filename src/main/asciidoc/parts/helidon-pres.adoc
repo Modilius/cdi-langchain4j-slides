@@ -1,3 +1,8 @@
+== Helidon car booking
+
+* A simplified car booking application inspired from the Java meets AI talk from Lize Raes at Devoxx Belgium 2023
+* Company is called "Miles of Smiles"
+* Derived from my Quarkus-LangChain4j example used to illustrate my talk at JChateau 2024
 
 == Helidon car booking
 
@@ -20,12 +25,13 @@ Pour des raisons de simplicité, il n'y a pas d'interaction avec une base de don
 == Pourquoi cette application ?
 
 * Quarkus propose une extension langchain4j
-* Helidon non
 * Découvrir l'utilisation de langchain4j avec CDI
+* Juger plus précisément ce que l'extension Quarkus apporte
 
 == Large Language Models
-
-pres LLM ?
+* Capable of recognizing and generating text
+* LLMs are trained on massive datasets
+* ChatGpt, Gemini, Mistral, Llama
 
 == Ai Model
 
@@ -228,6 +234,7 @@ public class ChatAiFactory {
     }
 }
 ----
+
 <1> we add the content retriever to the builder of the ChatAiService
 
 == SystemMessage enhancement
@@ -249,6 +256,7 @@ public interface ChatAiService {
     String chat(String question);
 }
 ----
+
 <1> In those 2 sentences we specify to the LLM to check cancellation policies (who are stored into the term-of-use.txt file)
 <2> This order also is made to make sure the LLM will verify user name and surname before giving any information for a given booking
 
@@ -323,7 +331,7 @@ public class BookingService {
 
 == BookingService 4/5
 
-TODO
+Create a function to have the booking details for a customer
 
 [source,subs="verbatim,quotes"]
 ----
@@ -341,7 +349,7 @@ public class BookingService {
 
 == BookingService 5/5
 
-TODO
+Create a function to cancel a booking for a customer
 
 [source,subs="verbatim,quotes"]
 ----
@@ -365,7 +373,7 @@ public class BookingService {
 
 == Add our Tool to ChatAiService
 
-TODO
+Once our tools are ready, we will add them to our AiService to allow the LLM to call them if needed
 
 [source,subs="verbatim,quotes"]
 ----
@@ -388,3 +396,10 @@ public class ChatAiFactory {
 }
 ----
 <1> we add the content retriever to the builder of the ChatAiService
+
+== Demo
+
+* questions à poser au bot :
+**
+**
+**
