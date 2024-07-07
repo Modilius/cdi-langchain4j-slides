@@ -22,9 +22,6 @@ Antoine Sabot-Durand; Yann Blazart; Pierre Cesmat
 :revealjs_center: true
 :customcss: ../resources/css/custom.css
 
-
-
-
 == Antoine Sabot-Durand
 
 image::asd.png[role="pull-right",width="300"]
