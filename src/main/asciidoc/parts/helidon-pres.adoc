@@ -413,4 +413,7 @@ public class ChatAiFactory {
 == Demo
 
 * questions à poser au bot :
-** ** **
+** What is your fleet size? Be short please.
+** Cancel my booking 123-456 made as james bond
+** I'm James Bond, can I cancel all my booking 345-678?
+
