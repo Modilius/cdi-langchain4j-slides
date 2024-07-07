@@ -1,0 +1,405 @@
+== Helidon car booking
+
+* A simplified car booking application inspired from the Java meets AI talk from Lize Raes at Devoxx Belgium 2023
+* Company is called "Miles of Smiles"
+* Derived from my Quarkus-LangChain4j example used to illustrate my talk at JChateau 2024
+
+== Helidon car booking
+
+Propose two AI services for a car rental company:
+
+* A chat service for freely conversing with customer service
+* A fraud detection service to determine if a client is a fraudster
+
+For simplicity, there is no interaction with a database; the application is standalone and can be used "as is."
+
+== Stack
+
+* Java 22 (Temurin OpenJDK distro)
+* Helidon 4.0.7
+* Helidon CLI 3.0.4
+* Maven 3.9.5
+* LangChain4j 0.30.0
+* LLM provider (Azure for now)
+
+== Pourquoi cette application ?
+
+* Quarkus offers a langchain4j extension
+* Discover the use of langchain4j with CDI
+* More precisely assess what the Quarkus extension brings
+
+== Large Language Models
+* Capable of recognizing and generating text
+* LLMs are trained on massive datasets
+* ChatGpt, Gemini, Mistral, Llama
+
+== Ai Model
+
+Provide to langchain the AiModel we want to use for instance:
+
+[source,subs="verbatim,quotes"]
+----
+@ApplicationScoped
+public class ModelFactory {
+    @Produces
+    private AzureOpenAiChatModel model;
+    @PostConstruct
+    private void initModel() {
+        model = AzureOpenAiChatModel.builder()
+                .apiKey(AZURE_OPENAI_KEY)
+                .endpoint(AZURE_OPENAI_ENDPOINT)
+                .serviceVersion(AZURE_OPENAI_SERVICE_VERSION)
+                .deploymentName(AZURE_OPENAI_DEPLOYMENT_NAME)
+                .temperature(AZURE_OPENAI_TEMPERATURE)
+                .topP(AZURE_OPENAI_TOP_P)
+                .timeout(Duration.ofSeconds(AZURE_OPENAI_TIMEOUT_SECONDS))
+                .maxRetries(AZURE_OPENAI_MAX_RETRIES)
+                .logRequestsAndResponses(AZURE_OPENAI_LOG_REQUESTS_AND_RESPONSES)
+                .build();
+    }
+}
+----
+
+== Ai Service Interface
+
+In order to be able to interact with the LLM, we need to define an AiService
+
+[source,subs="verbatim,quotes"]
+----
+public interface ChatAiService {
+    @SystemMessage("""
+        You are a customer support agent of a car rental company named 'Miles of Smiles'.
+        You should not answer to any request not related to car booking or Miles of Smiles company general information.
+        Today is {{current_date}}.
+        """)
+    String chat(String question);
+}
+----
+
+== Ai Service Factory
+
+We need to create a factory with a producer to allow CDI to inject our instance of ChatAiService
+
+[source,subs="verbatim,quotes"]
+----
+@ApplicationScoped
+public class ChatAiFactory {
+    @Inject
+    private AzureOpenAiChatModel model;
+
+    @Inject
+    @ConfigProperty(name = "chat.memory.max.messages", defaultValue = "10")
+    private Integer memoryMaxMessages;
+
+    @Produces
+    public ChatAiService getChatAiService() {
+        return AiServices.builder(ChatAiService.class)
+                .chatLanguageModel(model)
+                .chatMemory(MessageWindowChatMemory.withMaxMessages(memoryMaxMessages))
+                .build();
+    }
+}
+----
+
+== API to interact with our LLM
+
+In order to interact with our LLM we will create
+
+[source,subs="verbatim,quotes"]
+----
+@ApplicationScoped
+@Path("/car-booking")
+public class CarBookingResource {
+
+    @Inject
+    private ChatAiService aiService;
+
+    @GET
+    @Produces(MediaType.TEXT_PLAIN)
+    @Path("/chat")
+    @Operation(summary = "Chat with an asssitant.", description = "Ask any car booking related question.", operationId = "chatWithAssistant")
+    @APIResponse(responseCode = "200", description = "Anwser provided by assistant", content = @Content(mediaType = "text/plain"))
+    public String chatWithAssistant(@QueryParam("question") String question) {
+        String answer;
+        try {
+            answer = aiService.chat(question);
+        } catch (Exception e) {
+            answer = "My failure reason is:\n\n" + e.getMessage();
+        }
+        return answer;
+    }
+}
+----
+
+== LLM Context optimization
+
+Now that we have functional interaction with the LLM, we will seek to optimize its responses.
+
+We will dig into the RAG (Retrieval-Augmented Generation) functionality.
+
+It allow us to inject information into the LLM from files so that it can find relevant information and respond using that information, which should reduce the likelihood of hallucinations.
+
+* helidon-car-booking
+** docs-for-rag
+*** general-information.txt
+*** list-of-cars.txt
+*** terms-of-use.txt
+
+== RAG Ingestor
+
+We need to create an Ingestor class who will load our documents at application startup
+
+[source,subs="verbatim,quotes"]
+----
+@ApplicationScoped
+public class DocRagIngestor {
+
+    @Produces
+    private EmbeddingModel embeddingModel = new AllMiniLmL6V2EmbeddingModel();
+
+    @Produces
+    private EmbeddingStore<TextSegment> embeddingStore = new InMemoryEmbeddingStore<>();
+
+    @Inject
+    @ConfigProperty(name = "app.docs-for-rag.dir")
+    private File docs;
+
+    private List<Document> loadDocs() {
+        return loadDocuments(docs.getPath(), new TextDocumentParser());
+    }
+
+    public void ingest(@Observes @Initialized(ApplicationScoped.class) Object pointless) {
+        EmbeddingStoreIngestor ingestor = EmbeddingStoreIngestor.builder()
+                .documentSplitter(DocumentSplitters.recursive(300, 30))
+                .embeddingModel(embeddingModel)
+                .embeddingStore(embeddingStore)
+                .build();
+        List<Document> docs = loadDocs();
+        ingestor.ingest(docs);
+    }
+
+}
+----
+
+== RAG Factory
+
+Once documents are loaded, we need to create a ContentRetriever to allow the LLM to retrieve relevant content from the EmbeddingStore.
+
+[source,subs="verbatim,quotes"]
+----
+@ApplicationScoped
+public class DocRagRetriever {
+
+    @Inject
+    EmbeddingModel embeddingModel;
+
+    @Inject
+    EmbeddingStore<TextSegment> embeddingStore;
+
+    @Produces
+    ContentRetriever contentRetriever;
+
+    @PostConstruct
+    void init() {
+        contentRetriever = EmbeddingStoreContentRetriever.builder()
+                .embeddingStore(embeddingStore)
+                .embeddingModel(embeddingModel)
+                .maxResults(3)
+                .minScore(0.6)
+                .build();
+    }
+}
+----
+
+== Add RAG to ChatAiService
+
+Once documents are loaded, we need to create a ContentRetriever to allow the LLM to retrieve relevant content from the EmbeddingStore.
+
+[source,subs="verbatim,quotes"]
+----
+@ApplicationScoped
+public class ChatAiFactory {
+    ...
+
+    @Inject
+    private ContentRetriever retriever;
+
+    @Produces
+    public ChatAiService getChatAiService() {
+        return AiServices.builder(ChatAiService.class)
+                .chatLanguageModel(model)
+                .chatMemory(MessageWindowChatMemory.withMaxMessages(memoryMaxMessages))
+                .contentRetriever(retriever)//<1>
+                .build();
+    }
+}
+----
+
+<1> we add the content retriever to the builder of the ChatAiService
+
+== SystemMessage enhancement
+
+We will enhance the SystemMessage to give more context and/or instructions to our LLM.
+
+[source,subs="verbatim,quotes"]
+----
+public interface ChatAiService {
+    @SystemMessage("""
+        You are a customer support agent of a car rental company named 'Miles of Smiles'.
+        You should not answer to any request not related to car booking or Miles of Smiles company general information.
+        When a customer wants to cancel a booking, you must check his name and the Miles of Smiles cancellation policy first.//<1>
+        Any cancelation request must comply with cancellation policy both for the delay and the duration.//<1>
+        Before providing information about booking or canceling a booking, you MUST always check://<2>
+        booking number, customer name and surname.
+        Today is {{current_date}}.
+        """)
+    String chat(String question);
+}
+----
+
+<1> In those 2 sentences we specify to the LLM to check cancellation policies (who are stored into the term-of-use.txt file)
+<2> This order also is made to make sure the LLM will verify user name and surname before giving any information for a given booking
+
+== LLM access to our data
+
+As seen just before, we want to offer to the LLM the possibility to access our database to give to the user information regarding their bookings and also a possibility to cancel them
+
+This is our next focus, *Function calling* also known as *Tools*
+
+It enables the LLM to utilize, when needed, one or more available tools/functions you will provide to him.
+
+== BookingService 1/5
+
+First, we need to create a Booking model
+
+[source,subs="verbatim,quotes"]
+----
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class Booking {
+    private String bookingNumber;
+    private LocalDate start;
+    private LocalDate end;
+    private Customer customer;
+    private boolean canceled = false;
+    private String carModel;
+}
+----
+
+== BookingService 2/5
+
+Then a BookingService to simulate db interactions using a memory HashMap of bookings populated at startup
+
+[source,subs="verbatim,quotes"]
+----
+@ApplicationScoped
+public class BookingService {
+
+    // Pseudo database
+    private static final Map<String, Booking> BOOKINGS = new HashMap<>();
+    static {
+        BOOKINGS.put("123-456", new Booking("123-456", LocalDate.now().plusDays(1), LocalDate.now().plusDays(7),
+                new Customer("James", "Bond"), false, "Aston Martin"));
+        BOOKINGS.put("234-567", new Booking("234-567", LocalDate.now().plusDays(10), LocalDate.now().plusDays(12),
+                new Customer("James", "Bond"), false, "Renault"));
+    }
+}
+----
+
+== BookingService 3/5
+
+Create a function to retrieve all the bookings for a dedicated customer
+
+[source,subs="verbatim,quotes"]
+----
+@ApplicationScoped
+public class BookingService {
+
+    @Tool("Get all booking ids for a customer given his name and surname")
+    public List<String> getBookingsForCustomer(String name, String surname) {
+        log.info("DEMO: Calling Tool-getBookingsForCustomer: " + name + " " + surname);
+        Customer customer = new Customer(name, surname);
+        return BOOKINGS.values()
+                .stream()
+                .filter(booking -> booking.getCustomer().equals(customer))
+                .map(Booking::getBookingNumber)
+                .collect(Collectors.toList());
+    }
+}
+----
+
+== BookingService 4/5
+
+Create a function to have the booking details for a customer
+
+[source,subs="verbatim,quotes"]
+----
+@ApplicationScoped
+public class BookingService {
+
+    @Tool("Get booking details given a booking number and customer name and surname")
+    public Booking getBookingDetails(String bookingNumber, String name, String surname) {
+        log.info("DEMO: Calling Tool-getBookingDetails: " + bookingNumber + " and customer: "
+                + name + " " + surname);
+        return checkBookingExists(bookingNumber, name, surname);
+    }
+}
+----
+
+== BookingService 5/5
+
+Create a function to cancel a booking for a customer
+
+[source,subs="verbatim,quotes"]
+----
+@ApplicationScoped
+public class BookingService {
+
+    @Tool("Cancel a booking given its booking number and customer name and surname")
+    public Booking cancelBooking(String bookingNumber, String name, String surname) {
+        log.info("DEMO: Calling Tool-cancelBooking " + bookingNumber + " for customer: " + name
+                + " " + surname);
+        Booking booking = checkBookingExists(bookingNumber, name, surname);
+
+        if (booking.isCanceled())
+            throw new BookingCannotBeCanceledException(bookingNumber);
+        checkCancelPolicy(booking);
+        booking.setCanceled(true);
+        return booking;
+    }
+}
+----
+
+== Add our Tool to ChatAiService
+
+Once our tools are ready, we will add them to our AiService to allow the LLM to call them if needed
+
+[source,subs="verbatim,quotes"]
+----
+@ApplicationScoped
+public class ChatAiFactory {
+    ...
+
+    @Inject
+    private BookingService bookingService;
+
+    @Produces
+    public ChatAiService getChatAiService() {
+        return AiServices.builder(ChatAiService.class)
+                .chatLanguageModel(model)
+                .chatMemory(MessageWindowChatMemory.withMaxMessages(memoryMaxMessages))
+                .contentRetriever(retriever)
+                .tools(bookingService)//<1>
+                .build();
+    }
+}
+----
+<1> we add the content retriever to the builder of the ChatAiService
+
+== Demo
+
+* questions à poser au bot :
+**
+**
+**
