@@ -6,12 +6,12 @@
 
 == Helidon car booking
 
-Proposer deux services d'IA pour une société de location de voiture :
+Propose two AI services for a car rental company:
 
-* Un service de chat pour discuter librement avec le service client.
-* Un service de détection de fraude pour déterminer si un client est un fraudeur.
+* A chat service for freely conversing with customer service
+* A fraud detection service to determine if a client is a fraudster
 
-Pour des raisons de simplicité, il n'y a pas d'interaction avec une base de données, l'application est autonome et peut être utilisée "telle quelle".
+For simplicity, there is no interaction with a database; the application is standalone and can be used "as is."
 
 == Stack
 
@@ -24,9 +24,9 @@ Pour des raisons de simplicité, il n'y a pas d'interaction avec une base de don
 
 == Pourquoi cette application ?
 
-* Quarkus propose une extension langchain4j
-* Découvrir l'utilisation de langchain4j avec CDI
-* Juger plus précisément ce que l'extension Quarkus apporte
+* Quarkus offers a langchain4j extension
+* Discover the use of langchain4j with CDI
+* More precisely assess what the Quarkus extension brings
 
 == Large Language Models
 * Capable of recognizing and generating text
