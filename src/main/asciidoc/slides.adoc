@@ -25,14 +25,33 @@ Antoine Sabot-Durand; Yann Blazart; Pierre Cesmat
 
 
 == Antoine Sabot-Durand
-//TODO: add a picture
 
-* icon:coffee[] Antoine Sabot-Durand
+image::asd.png[role="pull-right",width="300"]
+* Java Champion
+* Tech lead at SCIAM
+* Former CDI spec lead
+* Former MicroProfile Health and Fault Tolerance spec lead
+* Follow me: @antoine_sd
+
+== Yann Blazart
+
+image::yb.png[role="pull-right",width="300"]
+* Developing in Java since forever
+* Open source contributor (JaxWS/Metro, TomEE, WicketExtJs)
+* Senior Tech lead at Sciam
+* Currently working in a big Bank as a technical advisor.
+* Introduced Quarkus and Ingnite to this same big bank
+
+== Pierre Cesmat
+
+image::pc.png[role="pull-right",width="300"]
+* RPA developer/consultant at Deloitte
+* Java software engineer at Sciam
+* Tech/Team lead at a major global banking player on a domestic payment engine migration
 
 == Agenda
 
 TIP: _Slides_ here {slides-url}
-
 
 * icon:clock-o[] Meet CDI
 * icon:clock-o[] Basic DI
@@ -71,12 +90,7 @@ include::parts/portable-extensions.adoc[]
 
 include::parts/helidon-pres.adoc[]
 
-
-
-
 == Conclusion
-
-
 
 == Features not covered in this talk
 
@@ -89,7 +103,6 @@ CAUTION: *Specialization* bean overriding
 CAUTION: *Transactional events* binding events to specific transaction phase
 
 CAUTION: Check the spec on {spec-url}
-
 
 == References
 

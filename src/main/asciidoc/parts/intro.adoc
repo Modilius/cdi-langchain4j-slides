@@ -72,7 +72,7 @@ Container is your application's invisible conductor
 ____
 
 
-== DI explained to your granny 1/3
+== DI explained to your granny (1/3)
 
 
 TIP: Dependency Injection delegates to a *container*/*injector*/*manager*...
@@ -89,7 +89,7 @@ DI is a *design pattern*
 ____
 
 
-== DI explained to your granny 2/3
+== DI explained to your granny (2/3)
 
 TIP: Without DI
 
@@ -108,7 +108,7 @@ public class MyBean {
 <1> instantiation and assignment is done in code
 
 
-== DI explained to your granny 3/3
+== DI explained to your granny (3/3)
 
 TIP: With DI
 
