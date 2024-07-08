@@ -1,11 +1,10 @@
 [.topic.intro]
 == Meet CDI SPI
-image:chess.jpg[width="110%"]
 
 
 
 [.topic]
-== SPI can be split in 4 parts
+=== SPI can be split in 4 parts
 
 [.statement]
 ====
@@ -24,22 +23,21 @@ NOTE: SPI dedicated to extensions
 
 
 
-
-[.topic.source]
-== SPI providing CDI entry points
-
-
 ////
+
+=== SPI providing CDI entry points
+
+
+
 [plantuml, "entry-points", "svg", height="95%", width="100%"]
 ----
 @startuml
+skinparam backgroundColor transparent
 
 BeanManager --() JNDI : "java:comp/BeanManager"
 CDI --|> Instance
 Unmanaged --> UnmanagedInstance : returns
 CDI -left-> BeanManager : returns
-
-
 
 interface BeanManager {
     +Object getReference(Bean<?>, Type, CreationalContext<?> )
@@ -101,10 +99,10 @@ class CDI<T> {
 @enduml
 ----
 ////
-schéma
 
-[.topic.source]
-== Why having a type meta-model?
+
+
+=== Why having a type meta-model?
 
 [.statement]
 ====
@@ -118,8 +116,8 @@ TIP: ...for annotated types
 ====
 
 
-[.topic.source]
-== SPI for type meta-model
+
+=== SPI for type meta-model
 
 [plantuml, "type-meta", "svg", height="95%", width="100%"]
 ----
@@ -187,12 +185,13 @@ interface AnnotatedMethod<X> {
 ----
 
 
-[.topic.source]
-== SPI dedicated to CDI meta-model (1/2)
+
+=== SPI dedicated to CDI meta-model (1/2)
 
 [plantuml, "cdi-meta1", "svg", height="95%", width="100%"]
 ----
 @startuml
+skinparam backgroundColor transparent
 
 Contextual <|-- Bean
 BeanAttributes <|-- Bean
@@ -238,12 +237,13 @@ interface Decorator<T> {
 @enduml
 ----
 
-[.topic.source]
-== SPI dedicated to CDI meta-model (2/2)
+
+=== SPI dedicated to CDI meta-model (2/2)
 
 [plantuml, "cdi-meta2", "svg", height="95%", width="100%"]
 ----
 @startuml
+skinparam backgroundColor transparent
 
 Producer <|-- InjectionTarget
 ProducerFactory ..> Producer : provides
@@ -301,7 +301,7 @@ interface InjectionPoint {
 ----
 
 ////
-[.topic.source]
+
 == This SPI can be used in your code (1/2)
 
 TIP: `InjectionPoint` can be used to get info about what's being injected
@@ -331,7 +331,7 @@ public @interface [HighLight]#HttpParam# {
 ----
 
 
-[.topic.source]
+
 == This SPI can be used in your code (2/2)
 
 TIP: `InjectionPoint` contains info about requested type at `@Inject`
@@ -356,7 +356,7 @@ class MyMapProducer() {
 
 
 
-[.topic.source]
+
 == This SPI can be used in your code (3/4)
 
 TIP: An abstract superclass can use meta to provide generic resolution
@@ -380,7 +380,7 @@ public Resolver getResolver() {
 }
 ----
 
-[.topic.source]
+
 == This SPI can be used in your code (4/4)
 
 TIP: `EventMetadata` contains type and qualifier info about the event
@@ -402,12 +402,13 @@ public class MyService {
 ////
 
 
-[.topic.source]
-== SPI dedicated to extensions
+
+=== SPI dedicated to extensions
 
 [plantuml, "spi-extensions", "svg", height="100%", width="100%"]
 ----
 @startuml
+skinparam backgroundColor transparent
 
 interface BeforeBeanDiscovery {
     +addQualifier(Class<? extends Annotation>)
@@ -484,8 +485,8 @@ interface ProcessProducer<T, X> {
 ----
 
 
-[.topic.source]
-== All these SPI interfaces are events containing meta-model SPI
+
+=== All these SPI interfaces are events containing meta-model SPI
 
 NOTE: These events fired at boot time can only be observed in CDI extensions
 
@@ -497,9 +498,10 @@ TIP: A `ProcessAnnotatedType<T>` event is fired for each type being discovered a
 
 TIP: Observing `ProcessAnnotatedType<Foo>` allows you to prevent `Foo` to be deployed as a bean by calling `ProcessAnnotatedType#veto()`
 
-
+////
 [.recap]
-== if it was too fast
+=== if it was too fast
 
 [.statement]
 Read my SPI post: http://j.mp/spipost
+////
