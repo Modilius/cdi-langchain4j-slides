@@ -62,7 +62,7 @@ image::pc.png[role="pull-right",width="200"]
 
 == Agenda
 
-TIP: _Slides_ here {slides-url}
+//TIP: _Slides_ here {slides-url}
 
 * icon:clock-o[] Meet CDI
 * icon:clock-o[] Basic DI
