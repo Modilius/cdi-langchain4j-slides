@@ -20,32 +20,45 @@ Antoine Sabot-Durand; Yann Blazart; Pierre Cesmat
 :revealjs_hash: true
 :revealjs_height: 1000
 :revealjs_center: true
-:customcss: ../resources/css/custom.css
+:docinfo: shared
 
+[.columns]
 == Antoine Sabot-Durand
 
-image::asd.png[role="pull-right",width="300"]
+[.column]
 * Java Champion
 * Tech lead at SCIAM
 * Former CDI spec lead
 * Former MicroProfile Health and Fault Tolerance spec lead
 * Follow me: @antoine_sd
 
+[.column]
+image::asd.png[role="pull-right",width="200"]
+
+[.columns]
 == Yann Blazart
 
-image::yb.png[role="pull-right",width="300"]
+[.column]
 * Developing in Java since forever
 * Open source contributor (JaxWS/Metro, TomEE, WicketExtJs)
 * Senior Tech lead at Sciam
 * Currently working in a big Bank as a technical advisor.
 * Introduced Quarkus and Ingnite to this same big bank
 
+[.column]
+image::yb.png[role="pull-right",width="200"]
+
+
+[.columns]
 == Pierre Cesmat
 
-image::pc.png[role="pull-right",width="300"]
+[.column]
 * RPA developer/consultant at Deloitte
 * Java software engineer at Sciam
 * Tech/Team lead at a major global banking player on a domestic payment engine migration
+
+[.column]
+image::pc.png[role="pull-right",width="200"]
 
 == Agenda
 
@@ -53,17 +66,17 @@ TIP: _Slides_ here {slides-url}
 
 * icon:clock-o[] Meet CDI
 * icon:clock-o[] Basic DI
-* icon:clock-o[] Meet our Helidon's LangChain4J App
 * icon:clock-o[] Qualifiers
 * icon:clock-o[] Producers
+* icon:clock-o[] Events
+* icon:clock-o[] Meet our Helidon's LangChain4J App
 * icon:clock-o[] Extensions
 //* icon:clock-o[] Bean resolution
 //* icon:clock-o[] Programmatic Lookup
 //* icon:clock-o[] Contexts
 //* icon:clock-o[] SPI
-* icon:clock-o[] Portable Extensions
-* icon:clock-o[] Events
-* icon:clock-o[] Interceptors and Decorators
+//* icon:clock-o[] Portable Extensions
+//* icon:clock-o[] Interceptors and Decorators
 //* icon:clock-o[] Conclusion
 
 
@@ -78,6 +91,8 @@ include::parts/producers.adoc[]
 
 include::parts/events.adoc[]
 
+include::parts/helidon-pres.adoc[]
+
 include::parts/spi.adoc[]
 
 include::parts/portable-extensions.adoc[]
@@ -88,7 +103,7 @@ include::parts/portable-extensions.adoc[]
 
 //include::parts/contexts.adoc[]
 
-include::parts/helidon-pres.adoc[]
+
 
 == Conclusion
 

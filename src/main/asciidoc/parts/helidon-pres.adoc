@@ -82,10 +82,11 @@ In order to be able to interact with the LLM, we need to define an AiService
 ----
 public interface ChatAiService {
     @SystemMessage("""
-        You are a customer support agent of a car rental company named 'Miles of Smiles'.
-        You should not answer to any request not related to car booking or Miles of Smiles company general information.
-        Today is {{current_date}}.
-        """)
+     You are a customer support agent of a car rental company
+     named 'Miles of Smiles'.You should not answer to any request
+     not related to car booking or Miles of Smiles company
+     general information. Today is {{current_date}}.
+     """)
     String chat(String question);
 }
 ----
@@ -95,6 +96,7 @@ public interface ChatAiService {
 We need to create a factory with a producer to allow CDI to inject our instance of ChatAiService
 
 [source,subs="verbatim,quotes"]
+[.stretch]
 ----
 @ApplicationScoped
 public class ChatAiFactory {
@@ -120,6 +122,7 @@ public class ChatAiFactory {
 In order to interact with our LLM we will create
 
 [source,subs="verbatim,quotes"]
+[.stretch]
 ----
 @ApplicationScoped
 @Path("/car-booking")
@@ -162,6 +165,7 @@ It allow us to inject information into the LLM from files so that it can find re
 We need to create an Ingestor class who will load our documents at application startup
 
 [source,subs="verbatim,quotes"]
+[.stretch]
 ----
 @ApplicationScoped
 public class DocRagIngestor {
@@ -198,6 +202,7 @@ public class DocRagIngestor {
 Once documents are loaded, we need to create a ContentRetriever to allow the LLM to retrieve relevant content from the EmbeddingStore.
 
 [source,subs="verbatim,quotes"]
+[.stretch]
 ----
 @ApplicationScoped
 public class DocRagRetriever {

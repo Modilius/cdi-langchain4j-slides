@@ -2,13 +2,6 @@
 == CDI Extensions
 
 
-== Two extension flavor
-
-Since CDI 4.0 you can choose between 2 kind of extensions
-
-* The original *Portable Extensions*
-* The *Build Time Compatible Extension* : introduced to support GraalVM and Quarkus
-
 
 [.topic.source]
 ==  Extensions's power
@@ -45,6 +38,13 @@ TIP: To extend CDI and Java EE
 TIP: Thanks to them, Java EE can evolve between major releases
 
 ====
+
+== Two extension flavor
+
+Since CDI 4.0 and CDI Lite you can choose between 2 kind of extensions
+
+* The original *Portable Extensions*
+* The *Build Time Compatible Extension* : introduced to support GraalVM and Quarkus
 
 == Focus on Portable extensions
 
@@ -168,4 +168,159 @@ icon:warning[] You only have to `@Observes` _built-in CDI events_ to create your
 
 === Why a new type of extension
 
-=== bli
+TIP: To support GraalVM and Quarkus
+
+TIP: To avoid runtime reflection
+
+TIP: To improve startup time
+
+TIP: To reduce memory footprint
+
+TIP: To support native image compilation
+
+=== How to create a Build Time Compatible Extension
+
+TIP: Use the `META-INF/services` file to declare your extension
+
+TIP: Implement the `BuildCompatibleExtension` interface
+
+TIP: Use the various annotations to hook into the build process
+
+=== BTCE hooks
+
+[cols="1,3"]
+|===
+|Annotation |Usage
+
+|`@Discovery`
+|Hook on types discovery
+
+|`@Enhancement`
+|modify annotation on types
+
+|`@Registration`
+|Hook on instances creation
+
+|`@Synthesis`
+|Adding new Bean
+
+|`@Validation`
+|validate all metadata
+
+|===
+
+=== BTCE language Model 1/3
+
+TIP: CDI Lite introduces jakarta.enterprise.lang.model API
+
+TIP: It models the Java language from a high-level perspective
+
+TIP: It replaces the existing CDI model that make heavy use of reflection
+
+TIP: Portable extension still use the previous language model
+
+=== BTCE language Model 2/3
+
+[cols="1,3"]
+|===
+|Element |Description
+
+|`AnnotationTarget`
+|Any element that can be annotated
+
+|`ClassInfo`
+|Class  metadata
+
+|`FieldInfo`
+|Field  metadata
+
+|`MethodInfo`
+|Methode  metadata
+
+|`RecordComponentInfo`
+|Record element metadata
+
+|===
+
+=== BTCE mutating metadata 3/3
+
+[cols="1,3"]
+|===
+|Element |Description
+
+|`ClassConfig`
+|Mutate class metadata
+
+|`MethodConfig`
+|Mutate method metadata
+
+|`FieldConfig`
+|Mutate Field metadata
+
+|===
+
+=== BTCE @Enhancement example
+
+TIP: Extension to remove `@MyQualifier` from `MyFooService` and add it to `MyBarService`
+
+[source, subs="verbatim,quotes"]
+----
+public class MyExtension implements BuildCompatibleExtension { // <1>
+
+    @Enhancement(types = MyFooService.class) //<2>
+    public void foo(ClassConfig clazz) {
+        clazz.removeAnnotation(it ->
+        it.name().equals(MyQualifier.class.getName()));
+    }
+
+    @Enhancement(types = MyBarService.class)
+    public void bar(ClassConfig clazz) {
+        clazz.addAnnotation(MyQualifier.class);
+    }
+}
+----
+<1> Implement the `BuildCompatibleExtension` interface
+<2> Use the `@Enhancement` annotation to hook into the build process
+
+=== BTCE @Synthesis example 1/2
+TIP: resgitering a new bean with its instance generator and disposer
+
+[source, subs="verbatim,quotes"]
+----
+public static class MyExtension implements BuildCompatibleExtension { //<1>
+    @Synthesis //<2>
+    public void synthesise(SyntheticComponents syn) {
+        syn.addBean(MyPojo.class) //<3>
+                .type(MyPojo.class)
+                .withParam("name", "World")
+                .createWith(MyPojoCreator.class)
+                .disposeWith(MyPojoDisposer.class);
+    }
+----
+<1> Implement the `BuildCompatibleExtension` interface
+<2> Use the `@Synthesis` annotation to hook into the build process
+<3> Register a new bean with its metadata, generator and disposer
+
+=== BTCE @Synthesis example 2/2
+
+TIP: Now we need to define how our instances will be created and disposed
+
+[source, subs="verbatim,quotes"]
+----
+public class MyPojoCreator implements SyntheticBeanCreator<MyPojo> { //<1>
+    @Override
+    public MyPojo create(Instance<Object> lookup, Parameters params) {
+        String name = params.get("name", String.class);
+        return new MyPojo("Hello " + name);
+    }
+}
+
+public static class MyPojoDisposer implements SyntheticBeanDisposer<MyPojo> { //<2>
+    @Override
+    public void dispose(MyPojo instance, Instance<Object> lookup, Parameters params) {
+        System.out.println("disposing " + instance.data);
+    }
+}
+----
+<1> Instance creation function
+<2> Instance disposal function
