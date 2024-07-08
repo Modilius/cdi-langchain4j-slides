@@ -3,12 +3,6 @@
 * Langchain4j presentation
 * Helidon's app presentation
 
-== Langchain4j
-
-* Java library designed to simplify the integration of Large Language Models (LLMs)
-* Offering an easy-to-use interface for leveraging AI capabilities
-* It provides tools for managing prompts, handling responses, and integrating with various LLMs
-
 == Large Language Models
 
 * LLMs are AI models that understand and generate human language using complex algorithms
@@ -21,6 +15,12 @@
 * Prompt engineering involves designing and refining input prompts to guide the output of language models effectively.
 * It includes crafting clear, specific prompts, using examples, and iterative testing to improve the quality and relevance of responses.
 * Used to enhance AI performance in tasks like question answering, content generation, and interactive conversations.
+
+== Langchain4j
+
+* Java library designed to simplify the integration of Large Language Models (LLMs)
+* Offering an easy-to-use interface for leveraging AI capabilities
+* It provides tools for managing prompts, handling responses, and integrating with various LLMs
 
 == Helidon car booking (1/3)
 
