@@ -1,7 +1,26 @@
 == Meet our Helidon's LangChain4J App
 
-* Helidon's app presentation
 * Langchain4j presentation
+* Helidon's app presentation
+
+== Langchain4j
+
+* Java library designed to simplify the integration of Large Language Models (LLMs)
+* Offering an easy-to-use interface for leveraging AI capabilities
+* It provides tools for managing prompts, handling responses, and integrating with various LLMs
+
+== Large Language Models
+
+* LLMs are AI models that understand and generate human language using complex algorithms
+* They are trained on vast text datasets to predict and generate text
+* LLMs perform tasks like text completion, translation, summarization, and conversation
+* ChatGpt, Gemini, Mistral, Llama
+
+== Prompt engineering
+
+* Prompt engineering involves designing and refining input prompts to guide the output of language models effectively.
+* It includes crafting clear, specific prompts, using examples, and iterative testing to improve the quality and relevance of responses.
+* Used to enhance AI performance in tasks like question answering, content generation, and interactive conversations.
 
 == Helidon car booking (1/3)
 
@@ -32,19 +51,6 @@ For simplicity, there is no interaction with a database; the application is stan
 * Maven 3.9.5
 * LangChain4j 0.30.0
 * LLM provider (Azure for now)
-
-== Large Language Models
-
-* LLMs are AI models that understand and generate human language using complex algorithms
-* They are trained on vast text datasets to predict and generate text
-* LLMs perform tasks like text completion, translation, summarization, and conversation
-* ChatGpt, Gemini, Mistral, Llama
-
-== Prompt engineering
-
-* Prompt engineering involves designing and refining input prompts to guide the output of language models effectively.
-* It includes crafting clear, specific prompts, using examples, and iterative testing to improve the quality and relevance of responses.
-* Used to enhance AI performance in tasks like question answering, content generation, and interactive conversations.
 
 == Ai Model
 
@@ -111,7 +117,8 @@ public class ChatAiFactory {
     public ChatAiService getChatAiService() {
         return AiServices.builder(ChatAiService.class)
                 .chatLanguageModel(model)
-                .chatMemory(MessageWindowChatMemory.withMaxMessages(memoryMaxMessages))
+                .chatMemory(MessageWindowChatMemory
+                    .withMaxMessages(memoryMaxMessages))
                 .build();
     }
 }
@@ -134,8 +141,10 @@ public class CarBookingResource {
     @GET
     @Produces(MediaType.TEXT_PLAIN)
     @Path("/chat")
-    @Operation(summary = "Chat with an asssitant.", description = "Ask any car booking related question.", operationId = "chatWithAssistant")
-    @APIResponse(responseCode = "200", description = "Anwser provided by assistant", content = @Content(mediaType = "text/plain"))
+    @Operation(summary = "Chat with an asssitant.",
+        description = "Ask any car booking related question.", operationId = "chatWithAssistant")
+    @APIResponse(responseCode = "200", description = "Anwser provided by assistant",
+        content = @Content(mediaType = "text/plain"))
     public String chatWithAssistant(@QueryParam("question") String question) {
         String answer;
         try {
@@ -171,10 +180,12 @@ We need to create an Ingestor class who will load our documents at application s
 public class DocRagIngestor {
 
     @Produces
-    private EmbeddingModel embeddingModel = new AllMiniLmL6V2EmbeddingModel();
+    private EmbeddingModel embeddingModel =
+        new AllMiniLmL6V2EmbeddingModel();
 
     @Produces
-    private EmbeddingStore<TextSegment> embeddingStore = new InMemoryEmbeddingStore<>();
+    private EmbeddingStore<TextSegment> embeddingStore =
+        new InMemoryEmbeddingStore<>();
 
     @Inject
     @ConfigProperty(name = "app.docs-for-rag.dir")
@@ -245,7 +256,8 @@ public class ChatAiFactory {
     public ChatAiService getChatAiService() {
         return AiServices.builder(ChatAiService.class)
                 .chatLanguageModel(model)
-                .chatMemory(MessageWindowChatMemory.withMaxMessages(memoryMaxMessages))
+                .chatMemory(MessageWindowChatMemory
+                    .withMaxMessages(memoryMaxMessages))
                 .contentRetriever(retriever)//<1>
                 .build();
     }
@@ -262,11 +274,16 @@ We will enhance the SystemMessage to give more context and/or instructions to ou
 ----
 public interface ChatAiService {
     @SystemMessage("""
-        You are a customer support agent of a car rental company named 'Miles of Smiles'.
-        You should not answer to any request not related to car booking or Miles of Smiles company general information.
-        When a customer wants to cancel a booking, you must check his name and the Miles of Smiles cancellation policy first.//<1>
-        Any cancelation request must comply with cancellation policy both for the delay and the duration.//<1>
-        Before providing information about booking or canceling a booking, you MUST always check://<2>
+        You are a customer support agent of a car rental company
+        named 'Miles of Smiles'.You should not answer to any request
+        not related to car booking or Miles of Smiles company
+        general information. Today is {{current_date}}.
+        When a customer wants to cancel a booking,
+        you must check his name and the Miles of Smiles cancellation policy first.//<1>
+        Any cancelation request must comply with cancellation policy both for
+        the delay and the duration.//<1>
+        Before providing information about booking or canceling a booking,
+        you MUST always check://<2>
         booking number, customer name and surname.
         Today is {{current_date}}.
         """)
@@ -316,10 +333,10 @@ public class BookingService {
     // Pseudo database
     private static final Map<String, Booking> BOOKINGS = new HashMap<>();
     static {
-        BOOKINGS.put("123-456", new Booking("123-456", LocalDate.now().plusDays(1), LocalDate.now().plusDays(7),
-                new Customer("James", "Bond"), false, "Aston Martin"));
-        BOOKINGS.put("234-567", new Booking("234-567", LocalDate.now().plusDays(10), LocalDate.now().plusDays(12),
-                new Customer("James", "Bond"), false, "Renault"));
+        BOOKINGS.put("123-456", new Booking("123-456", LocalDate.now().plusDays(1),
+            LocalDate.now().plusDays(7), new Customer("James", "Bond"), false, "Aston Martin"));
+        BOOKINGS.put("234-567", new Booking("234-567", LocalDate.now().plusDays(10),
+            LocalDate.now().plusDays(12), new Customer("James", "Bond"), false, "Renault"));
     }
 }
 ----
@@ -405,7 +422,8 @@ public class ChatAiFactory {
     public ChatAiService getChatAiService() {
         return AiServices.builder(ChatAiService.class)
                 .chatLanguageModel(model)
-                .chatMemory(MessageWindowChatMemory.withMaxMessages(memoryMaxMessages))
+                .chatMemory(MessageWindowChatMemory
+                    .withMaxMessages(memoryMaxMessages))
                 .contentRetriever(retriever)
                 .tools(bookingService)//<1>
                 .build();
