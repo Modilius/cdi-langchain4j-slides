@@ -18,8 +18,8 @@ Antoine Sabot-Durand; Yann Blazart; Pierre Cesmat
 :revealjs_theme: beige
 :revealjsdir: https://cdn.jsdelivr.net/npm/reveal.js@5.1.0
 :revealjs_hash: true
-:revealjs_height: 1000
-:revealjs_center: true
+:revealjs_width: 1500
+:revealjs_center: false
 :docinfo: shared
 
 [.columns]

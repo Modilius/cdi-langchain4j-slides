@@ -90,13 +90,17 @@ public class CdiExtension [highlight]#implements Extension# {
 ----
 
 
-[.topic.source]
+[.columns.auto]
 === Bean manager lifecycle
 
-[plantuml, "lifecycle-simple", "svg", height="85%", width="95%"]
+[.column.is-one-fifth]
+include::legend.adoc[]
+
+[.column]
+[plantuml, "lifecycle-simple", "svg",  width="80%"]
 ----
 @startuml
-
+skinparam backgroundColor transparent
 
 skinparam activity {
   BackgroundColor #337788
@@ -131,7 +135,7 @@ skinparam activity {
 @enduml
 ----
 
-include::legend.adoc[]
+
 
 
 [.topic.source]
